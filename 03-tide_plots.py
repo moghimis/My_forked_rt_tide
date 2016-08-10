@@ -33,6 +33,7 @@ from okean import calc
 import matplotlib.tri as mtri
 import matplotlib.mlab as ml
 
+
 #cmap = pl_tools.cm_ncview.bright
 #cmap = pl_tools.cm_ncview.3saw
 #cmap = pl_tools.cm_ncview.3gauss
@@ -61,6 +62,30 @@ def lonlat2xy(proj,lon,lat):
     x = xu - xu_orig
     y = yu - yu_orig
     return x,y
+
+
+def get_depth(x,y,all=False):
+    bat_in   = 'data/nri_regional_grd_roms_v2.nc'
+    tnc    = netCDF4.Dataset(bat_in)
+    tvars  = tnc.variables
+    xb     = tnc.variables['x_rho'][:]
+    yb     = tnc.variables['y_rho'][:]
+    bat    = tnc.variables['h'][:]
+    bat    = np.ma.masked_where(bat==-10.0,bat)
+    if False:
+        dep    = calc.griddata(xb[~bat.mask], yb[~bat.mask],bat[~bat.mask] , x, y,extrap=True)
+    else:
+        import octant.csa as csa
+        csa_interp = csa.CSA(xb[~bat.mask], yb[~bat.mask],bat[~bat.mask])
+        dep = csa_interp(x,y)
+    
+    if all:
+        return dep,xb,yb,bat
+    else:
+        return dep
+
+
+
 
 for sta_name in flow_data.keys():
     sta      = flow_data[sta_name]
@@ -97,6 +122,7 @@ lon   = np.array(lon)
 lat   = np.array(lat)
 m2    = np.array(m2)
 k1    = np.array(k1)
+stas  = np.array(stas)
 
 proj = projection_nri ()
 x,y    = lonlat2xy(proj,lon,lat)
@@ -182,23 +208,26 @@ for const in  ['M2']:
 
         
         
-        p2 = ax1.scatter(x, y, s = 20, c = data1,edgecolors='None',cmap = pl_tools.cm_ncview.banded )
+        p2 = ax1.scatter(x, y, s = 5, c = data1,edgecolors='None',cmap = pl_tools.cm_ncview.banded )
         #p2.set_clim(lims[iax])
         #ax1.colorbar(p2)
 
-        #for i in range(len(x)):
-        #    plt.text   (x[i], y[i], stas[i] )
+        for i in range(len(x)):
+            ax1.text   (x[i], y[i], stas[i],fontsize = 6 )
+        
+        
+        
+        #plot contour line from obs
         #interp_lin = mtri.LinearTriInterpolator(tri,m2[:,0] )   #m2 amp tappy
         #m2_local   = interp_lin(xl, yl)
         #m2_local = ml.griddata(x, y,m2[:,0] , xl, yl)
-        m2_local = calc.griddata(x, y,data1 , xl, yl,extrap=True)
-        cl1 = ax1.contour(xl,yl,m2_local,colors='black')
-        ax1.clabel(cl1,fontsize=10,inline=True,fmt=fmt)
+        #m2_local = calc.griddata(x, y,data1 , xl, yl,extrap=True)
+        #cl1 = ax1.contour(xl,yl,m2_local,colors='black')
+        #ax1.clabel(cl1,fontsize=10,inline=True,fmt=fmt)
         iax += 1
         
 
 plt.savefig('test.png',dpi=450)
-plt.show()
 # os.system('mkdir -p '+outdirf+'/0scr')
 # #Back_up scr
 # args     = sys.argv
@@ -206,9 +235,99 @@ plt.show()
 # scr_dir1 = os.getcwd()
 # os.system('cp -fr  '+scr_name +'    '+outdirf+'/0scr')
 # #os.system('cp -fr  '+inp_dir+'/*' +'    '+outdirf+'/0scr')
+plt.close('all')
+
+dep,xb,yb,bat = get_depth(x,y,all=True)
+
+xarg = np.argsort(x)
+
+fig2 = plt.figure()
+ax = fig2.add_subplot(111)
+ax.set_title('M2 Amp. [m]')
+#ax.plot(m2[:,0][xarg],'r',lw=1,label ='Tappy' )
+ax.plot(m2[:,2][xarg],'b',lw=1,label ='RTT' )
+ax.plot(m2[:,4][xarg],'g',lw=1,label ='OTPS' )
+ax.xaxis.set_ticklabels(stas[xarg])
+#ax.set_ylim(0.5,0.6)
+ax.legend(frameon=False)
 
 
-print ' End >>>'
+ax2 = ax.twinx()
+ax2.plot(dep[xarg],'k')
+ax2.set_ylabel('Depth [m]')
+#ax2.set_ylim(5,8)
+
+plt.savefig('m2_amp.png',dpi=450)
+
+
+fig3 = plt.figure()
+ax = fig3.add_subplot(111)
+ax.set_title('M2 Pha. [deg]')
+#ax.plot(m2[:,1][xarg],'r',lw=1,label ='Tappy' )
+ax.plot(m2[:,3][xarg],'b',lw=1,label ='RTT' )
+ax.plot(m2[:,5][xarg],'g',lw=1,label ='OTPS' )
+ax.xaxis.set_ticklabels(stas[xarg])
+#ax.set_ylim(220,240)
+
+ax.legend()
+
+ax2 = ax.twinx()
+ax2.plot(dep[xarg],'k')
+ax2.set_ylabel('Depth [m]')
+#ax2.set_ylim(5,8)
+plt.savefig('m2_pha.png',dpi=450)
 
 
 
+fig2 = plt.figure()
+ax = fig2.add_subplot(111)
+ax.set_title('K1 Amp. [m]')
+#ax.plot(k1[:,0][xarg],'r',lw=1,label ='Tappy' )
+ax.plot(k1[:,2][xarg],'b',lw=1,label ='RTT' )
+ax.plot(k1[:,4][xarg],'g',lw=1,label ='OTPS' )
+ax.xaxis.set_ticklabels(stas[xarg])
+#ax.set_ylim(0.5,0.6)
+
+ax.legend()
+ax2 = ax.twinx()
+ax2.plot(dep[xarg],'k')
+ax2.set_ylabel('Depth [m]')
+#ax2.set_ylim(5,8)
+plt.savefig('k1_amp.png',dpi=450)
+
+
+
+fig3 = plt.figure()
+ax = fig3.add_subplot(111)
+ax.set_title('K1 Pha. [deg]')
+#ax.plot(k1[:,1][xarg],'r',lw=1,label ='Tappy' )
+ax.plot(k1[:,3][xarg],'b',lw=1,label ='RTT' )
+ax.plot(k1[:,5][xarg],'g',lw=1,label ='OTPS' )
+ax.xaxis.set_ticklabels(stas[xarg])
+#ax.set_ylim(220,240)
+
+ax.legend()
+ax2 = ax.twinx()
+ax2.plot(dep[xarg],'k')
+ax2.set_ylabel('Depth [m]')
+#ax2.set_ylim(5,8)
+
+plt.savefig('k1_pha.png',dpi=450)
+
+
+
+
+fig3 = plt.figure()
+ax = fig3.add_subplot(111)
+p1 = ax.contourf(xb,yb,bat,levels=np.linspace(0,8,11),extend='both')
+plt.colorbar(p1)
+p2 = ax.scatter(x, y, s = 5, c = 'k')
+for i in range(len(x)):
+    ax.text   (x[i], y[i], stas[i],fontsize = 12 )
+
+ax.set_xlim(-2000,2000)
+ax.set_ylim(-2000,2000)
+ax.set_aspect(1)
+
+plt.savefig('sta_map.png',dpi=450)
+plt.show()

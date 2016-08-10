@@ -9,28 +9,13 @@ import netCDF4
 import netcdftime
 
 from numpy import asarray, ma
-from delaunay import  *
 import pylab
 from matplotlib.pylab import *
-import sys
-from mpl_toolkits.basemap import Basemap
+#from mpl_toolkits.basemap import Basemap
 import os,sys
 import glob
 
-
-import tappy
-
-
-
-#fpo = open("Wrightsville_beach_jun2012_MSL_out.txt", "w")
-#for index in range(len(dates)):
-#    fpo.write("%s %f\n" % (dates[index].isoformat(), elevation[index]))
-#con = N.convolve(elevation, [1./25.]*25, mode=1)
-
-#fpo = open("Wrightsville_beach_jun2012_MSL_convolved.dat", "w")
-#for index in range(len(dates)):
-#    fpo.write("%s %f\n" % (dates[index].isoformat(), elevation[index] - con[index]))
-
+#import tappy
 
 
 #reading from web:
@@ -1224,7 +1209,6 @@ class tappy(Util):
 
         return nelevation, cndates, nslice
 
-
     def delta_diff(self, elev, delta, start_index):
         bindex = delta
         if start_index > delta:
@@ -1551,16 +1535,14 @@ class tappy(Util):
         if self.linear_trend:
             print "# SLOPE OF REMOVED LINEAR TREND = ", self.slope
 
-    def print_con_file(self):
+    def print_con_file(self,filedat,lon,lat):
         global ftp
         ftp=open(filedat,'w')
         ndict = {}
         for k in self.key_list:
             ndict[k] = self.speed_dict[k]['speed']
         ftp.write('Tappy output \n')
-        str00='start_date:  '+start_date+'  \n'
-        ftp.write(str00)
-        str0=filedat+ '\n lat= '+str(lat1)+'   lon1= '+str(lon1)+'\n ======================================================='
+        str0 = filedat + '\n  lat= '+ str(lat) + '  lon1= '+ str(lon) + '\n ======================================================='
         ftp.write(str0)
         str1="\n#%12s %12s %12s %12s" % ("NAME", "SPEED", "H", "PHASE")
         str1=str1+'\n'
@@ -2066,206 +2048,112 @@ def analysis(
         tree.write(x.outputxml)
 
 
-### Saeed tries to understand!  from here
-
-
-
-global lat1
-global lon1
-global filedat
-global start_date
-
-tmp="/home/server/pi/homes/moghimi/Desktop/local/working/tmp/for_tidal/*_filter_abs.nc"
-tmp="/home/server/pi/homes/moghimi/work/00-projs/01-muri/01-data/03-wave-data/00-NRI-specific/steve/data/rev02_oct2012/RIVET_Britt_ADV_cdf/final_cat/*_filter_abs.nc"
-
-flist=glob.glob(tmp)
-flist.sort()
-
-
-
-for file in flist[:]:
-    print file
-    filename = file
-    ncf=netCDF4.Dataset(filename,'r+')
-    ncvar=ncf.variables
+# ### Saeed tries to understand!  from here
+# 
+# time       = ncvar['time']
+# time_unit  = time.units
+# time1      = time[:]  #! 3 hourly
+# utime      = netcdftime.utime(time.units)
+# dates      = utime.num2date(time[:])
+# elev       = ncvar[param_name]
+# lat        = ncvar['lat']
+# lon        = ncvar['lon']
+# print 'lat',lat1,'lon',lon1
+# 
+# 
+# ### Saeed tries to understand!  from here
+# data_filename    ='test'
+# def_filename     = None
+# config           = None
+# quiet            = False
+# debug            = False
+# outputts         = False
+# outputxml        = ''
+# ephemeris        = False
+# rayleigh         = 0.6
+# print_vau_table  = False
+# missing_data     = 'ignore'
+# #missing_data    = 'fill'
+# linear_trend     = False
+# remove_extreme   = False
+# zero_ts          = None
+# filter           = None
+# pad_filters      = None
+# include_inferred = True
+# xmlname          = 'NRI elgar'
+# xmlcountry       = 'NRI'
+# xmllatitude      = lat1
+# xmllongitude     = lon1
+# xmltimezone      = '0000'
+# xmlcomments      = 'No comment'
+# xmlunits         = 'm or ms-1'
+# xmldecimalplaces = None
+# 
+# ############## model
+# x = tappy(
+#         outputts = outputts,
+#         outputxml = 'model.xml',
+#         quiet=quiet,
+#         debug=debug,
+#         ephemeris=ephemeris,
+#         rayleigh=rayleigh,
+#         print_vau_table=print_vau_table,
+#         missing_data=missing_data,
+#         linear_trend=linear_trend,
+#         remove_extreme=remove_extreme,
+#         zero_ts=zero_ts,
+#         filter=filter,
+#         pad_filters=pad_filters,
+#         include_inferred=include_inferred,
+#         )
+# 
+# 
+# x.dates=dates
+# x.elevation=elev1
+# package = x.astronomic(x.dates)
+# (x.zeta, x.nu, x.nup, x.nupp, x.kap_p, x.ii, x.R, x.Q, x.T, x.jd, x.s, x.h, x.N, x.p, x.p1) = package
+# ray = 1.0
+# (x.speed_dict, x.key_list) = x.which_constituents(len(x.dates),
+#                                                       package,
+#                                                       rayleigh_comp = ray)
+# 
+# x.constituents()
+# #x.print_con()
+# x.print_con_file()
+# 
+# only_const = False
+# 
+# if not only_const:
+#     
+#     if x.missing_data == 'fill':
+#             x.dates_filled, x.elevation_filled = x.missing(x.missing_data, x.dates, x.elevation)
+#             x.write_file( x.dates_filled,
+#                             x.elevation_filled,
+#                             fname='outts_filled.dat')
+#     
+#     
+#     if file[10:13]=='q00':
+#         mean_part1=x.elevation[:8165].mean()
+#         mean_part2=x.elevation[8175:].mean()
+#         x.elevation[8165:8175]=mean_part2
+#         x.elevation[:8165]=x.elevation[:8165]+mean_part2-mean_part1
+#         ind=where( (x.dates> datetime.datetime(2012,05,30) )  )
+#         x.elevation[ind]=x.elevation.mean()
+#         ind=where( (x.dates < datetime.datetime(2012,04,29) )  )
+#         x.elevation[ind]=x.elevation.mean()        
+#     
+#     
+#     x.filter='usgs'
+#     #x.filter='doodson'
+#     
+#     if x.filter:
+#             for item in x.filter.split(','):
+#                 if item in ['mstha', 'wavelet', 'cd', 'boxcar', 'usgs', 'doodson', 'lecolazet1', 'kalman', 'transform']:# 'lecolazet', 'godin', 'sfa']:
+#                     filtered_dates, result = x.filters(item, x.dates, x.elevation)
+#                     x.write_file(filtered_dates, result, fname='outts_filtered_%s.dat' % (item,))
+#                     x_dates_filter= filtered_dates
+#                     x_eleva_filter= result              
+#             (x.speed_dict, x.key_list) = x.which_constituents(len(x.dates),package,rayleigh_comp = ray)
+#     
+#     
     
-    filedat=file[:-2]+'dat'
-    vv=False
-    
-    time=ncvar['time']
-    time_unit=time.units
-    time1=time[:]  #! 3 hourly
-    utime=netcdftime.utime(time.units)
-    dates=utime.num2date(time[:])
-    start_date=dates[0].isoformat()
-
-    if vv:
-        print ncvar
-        print time_unit
-    
-    #read vars
-    param_name=ncvar.items()[6][0]
-    elev=ncvar[param_name]
-    elev1=elev[:]
-    elevation = elev1
-    
-    param_unit=ncvar[param_name].units
-    
-    
-    
-    lat=ncvar['lat']
-    lat1=lat[0]
-    lon=ncvar['lon']
-    lon1=lon[0]
-    
-    print 'lat',lat1,'lon',lon1
-    
-    ### Saeed tries to understand!  from here
-    
-    data_filename='test'
-    def_filename=None
-    config=None
-    quiet=False
-    debug=False
-    outputts=False
-    outputxml=''
-    ephemeris=False
-    rayleigh=0.6
-    print_vau_table=False
-    missing_data='ignore'
-    #missing_data='fill'
-    linear_trend=False
-    remove_extreme=False
-    zero_ts=None
-    filter=None
-    pad_filters=None
-    include_inferred=True
-    xmlname='NRI elgar'
-    xmlcountry='NRI'
-    xmllatitude=lat1
-    xmllongitude=lon1
-    xmltimezone='0000'
-    xmlcomments='No comment'
-    xmlunits='m or ms-1'
-    xmldecimalplaces=None
-    
-    ############## model
-    x = tappy(
-            outputts = outputts,
-            outputxml = 'model.xml',
-            quiet=quiet,
-            debug=debug,
-            ephemeris=ephemeris,
-            rayleigh=rayleigh,
-            print_vau_table=print_vau_table,
-            missing_data=missing_data,
-            linear_trend=linear_trend,
-            remove_extreme=remove_extreme,
-            zero_ts=zero_ts,
-            filter=filter,
-            pad_filters=pad_filters,
-            include_inferred=include_inferred,
-            )
-    
-    
-    x.dates=dates
-    x.elevation=elev1
-    package = x.astronomic(x.dates)
-    (x.zeta, x.nu, x.nup, x.nupp, x.kap_p, x.ii, x.R, x.Q, x.T, x.jd, x.s, x.h, x.N, x.p, x.p1) = package
-    ray = 1.0
-    (x.speed_dict, x.key_list) = x.which_constituents(len(x.dates),
-                                                          package,
-                                                          rayleigh_comp = ray)
-    
-    x.constituents()
-    #x.print_con()
-    x.print_con_file()
-    if x.missing_data == 'fill':
-            x.dates_filled, x.elevation_filled = x.missing(x.missing_data, x.dates, x.elevation)
-            x.write_file( x.dates_filled,
-                            x.elevation_filled,
-                            fname='outts_filled.dat')
-    
-    
-    if file[10:13]=='q00':
-        mean_part1=x.elevation[:8165].mean()
-        mean_part2=x.elevation[8175:].mean()
-        x.elevation[8165:8175]=mean_part2
-        x.elevation[:8165]=x.elevation[:8165]+mean_part2-mean_part1
-        ind=where( (x.dates> datetime.datetime(2012,05,30) )  )
-        x.elevation[ind]=x.elevation.mean()
-        ind=where( (x.dates < datetime.datetime(2012,04,29) )  )
-        x.elevation[ind]=x.elevation.mean()        
-    
-    
-    x.filter='usgs'
-    #x.filter='doodson'
-    
-    if x.filter:
-            for item in x.filter.split(','):
-                if item in ['mstha', 'wavelet', 'cd', 'boxcar', 'usgs', 'doodson', 'lecolazet1', 'kalman', 'transform']:# 'lecolazet', 'godin', 'sfa']:
-                    filtered_dates, result = x.filters(item, x.dates, x.elevation)
-                    x.write_file(filtered_dates, result, fname='outts_filtered_%s.dat' % (item,))
-                    x_dates_filter= filtered_dates
-                    x_eleva_filter= result              
-            (x.speed_dict, x.key_list) = x.which_constituents(len(x.dates),package,rayleigh_comp = ray)
-    
-    
-    
-    
-    yd_time=x.dates
-    yd_sec=utime.date2num(yd_time)
-    
-    ft_sec=utime.date2num(x_dates_filter)
-    ft_lev_new =  interp( yd_sec,ft_sec, x_eleva_filter)
-    elev_filter = ft_lev_new
- 
-    
-    p1 = ncf.createVariable('filter','f8',('time',))
-    p1.units = param_unit
-    p1[:]=elev_filter[:]
-    p1.missing_value = -9999.0
-
-    
-    
-    # replace improved variable in ncfile
-    if file[10:13] in ['q00']:
-        ncvar[param_name]=x.elevation[:]
-        
-    
-    ncf.close    
-        
-
-    
-    
-    PLOT=True
-    if PLOT:
-        ###################################################33
-        fwidth=12
-        fheight=3
-        fig=figure(figsize=(fwidth,fheight))
-        
-        
-        #xmean_elev= x.elevation_filled.mean()
-        #ymean_elev= y.elevation_filled.mean()
-        
-        xmean_elev= x.elevation.mean()
-        
-        
-        plot(  x.dates        ,   x.elevation      - xmean_elev     ,'k', label='elev ')         
-        
-        labelx='Filter  '+ x.filter
-        plot(x_dates_filter , x_eleva_filter- xmean_elev ,'b' , label=labelx)
-        
-        
-        
-        #xmin=dates[1900]
-        #xmax=dates[-200]
-        #gca().set_xlim(xmin,xmax)
-        legend()
-        
-        pngfile='png_tidal/'+file[-27:-3]+'.png' 
-        savefig(pngfile,dpi=300)
-
-
-

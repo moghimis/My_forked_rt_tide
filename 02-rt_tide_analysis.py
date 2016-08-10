@@ -360,9 +360,9 @@ for sta_name in flow_data.keys():
     
     flow_data[sta_name]['otps_tide'] = sta_df
 
-sta      = flow_data['p88']
-sta_tap  = sta['tappy_tide']
-sta_rtd  = sta['r_t_tide']
+#sta      = flow_data['p88']
+#sta_tap  = sta['tappy_tide']
+#sta_rtd  = sta['r_t_tide']
 
 
 pick_name = data_dir + '/tidal_data_const.pickle'
