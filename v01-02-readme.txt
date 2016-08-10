@@ -8,24 +8,15 @@ The file tides_v_river defines a for-loop for each of the different data sites, 
 
 
 
-Lumas Helaire
 	
 Attachments9:37 AM (13 minutes ago)
 		
-to Stefan, Adam, Andrew, Aqeel, Austin, David, Edward, Joe, Jonathan, Maggie, PDX, Ramin, Riyadh, Ryan, Sarkawt, William
-Hello,
-
 I've attached a copy of Stefan's r_t_tide fix to run a limited constituent set.  Place the the script in the Matlab directory with r_t_tide.  Use the argument 'con' and provided an array with the constituent set you would like to use (code and matlab file). Below is the command needed to run the script.  
 
 
 
 [name,freq,tidecon,xout]=  r_t_tide_sat(t,h, 'latitude',46.2,  'nodalcorrflag','true','greenwichcorrflag''true','start time',tm(1), 'con', lmt_con);
     
-Let me know if you  have any questions.
-
-thanks,
-
-Lumas
 
 
 
@@ -41,9 +32,6 @@ Lumas
 
 
 
-
-
-Lumas,
 
 Thanks--good idea to send out.  Actually, think you sent out your own version of r_t_tide, though the command for calling the 'constituent' flag is correct.  The (slight) problem with the version you sent is that the 'constituent' flag is not in the header/help section.  The other issues is that the problem with the Rayleigh flag is still there.
 
